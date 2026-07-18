@@ -4,6 +4,7 @@
 # Données volumineuses
 data/data_set.json
 data/resultats_inference.json
+TP- Rule Based/data/resultats_inference.json
 
 # Modèle (optionnel, peut être lourd)
 # model_ner/
