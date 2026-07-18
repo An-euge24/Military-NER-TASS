@@ -1,0 +1,101 @@
+============================================================
+COMPARAISON RULE-BASED vs LLM (Groq Llama-3)
+============================================================
+
+                            Rule-Based          LLM
+--------------------------------------------------
+Articles annotés                   516          384
+  WEAPON                           367          561
+  MIL_UNIT                         254          600
+  MIL_ORG                          691          729
+TOTAL entités                     1312         1890
+Termes uniques WEAPON               43          424
+Termes uniques MIL_UNIT             17          363
+Termes uniques MIL_ORG              14          317
+
+🆕 WEAPON — termes détectés UNIQUEMENT par le LLM (390) :
+   - 120-mm mortars
+   - 120mm mortar
+   - 2a42
+   - 2c3 akatsiya
+   - 2s3 akatsiya
+   - 9a331mk-1
+   - a-10
+   - a-10 thunderbolt
+   - admiral essen
+   - admiral gorshkov
+   - admiral kasatonov
+   - admiral nakhimov
+   - admiral of the fleet of the soviet union gorshkov
+   - admiral panteleyev anti-submarine destroyer
+   - admiral tributs
+   - admiral vinogradov
+   - aegis ashore
+   - aerial bombs
+   - ag-17d
+   - air defense facilities
+   ... et 370 autres
+
+📌 WEAPON — termes détectés UNIQUEMENT par Rule-Based (9) :
+   - iskander
+   - mi-28
+   - mi-35
+   - s-500
+   - su-30
+   - tornado-g
+   - tornado-s
+   - triumf
+   - yasen-m
+
+🆕 MIL_UNIT — termes détectés UNIQUEMENT par le LLM (348) :
+   - 101st territorial defense brigade
+   - 105th territorial defense brigades
+   - 115th mechanized brigade
+   - 118th mechanized brigade
+   - 128th mountain assault brigade
+   - 128th territorial defense brigade
+   - 129th defense brigade
+   - 155th marine brigade
+   - 155th separate marine guards brigade
+   - 201st military base
+   - 24th mechanized brigade
+   - 24th separate mechanized brigade
+   - 25th air assault brigade
+   - 2nd army corps
+   - 3rd assault brigade
+   - 3rd separate tank brigade
+   - 53rd separate mechanized brigade
+   - 57th motorized infantry brigade
+   - 67th ukrainian mechanized brigade
+   - 68th ranger brigade
+   ... et 328 autres
+
+📌 MIL_UNIT — termes détectés UNIQUEMENT par Rule-Based (2) :
+   - aerospace forces
+   - vostok
+
+🆕 MIL_ORG — termes détectés UNIQUEMENT par le LLM (304) :
+   - admiral sergei avakyants
+   - admiral t
+   - admiral viktor liina
+   - admiralty shipyards
+   - aerospace forces
+   - alabino practice range
+   - albert druzhinin
+   - alexander fomin
+   - alexander lapin
+   - alexander lukashenko
+   - alexander mikheyev
+   - alexey arestovish
+   - almaz central marine design bureau
+   - amur shipbuilding plant
+   - anatoly punchuk
+   - andrey belousov
+   - antony blinken
+   - apty alaudinov
+   - armed forces
+   - armed forces of the russian federation
+   ... et 284 autres
+
+📌 MIL_ORG — termes détectés UNIQUEMENT par Rule-Based (1) :
+   - svr

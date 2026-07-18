@@ -1,0 +1,20 @@
+# Secrets
+.env
+
+# Données volumineuses
+data/data_set.json
+data/resultats_inference.json
+
+# Modèle (optionnel, peut être lourd)
+# model_ner/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
