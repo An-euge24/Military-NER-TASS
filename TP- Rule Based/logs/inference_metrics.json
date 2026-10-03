@@ -1,0 +1,18 @@
+{
+  "articles_traitees": 21675,
+  "articles_avec_entites": 13648,
+  "articles_sans_entite": 8027,
+  "entites_par_label": {
+    "WEAPON": 9266,
+    "MIL_UNIT": 6970,
+    "MIL_ORG": 18612
+  },
+  "entites_total": 34848,
+  "model_load_seconds": 0.48,
+  "data_load_seconds": 0.22,
+  "inference_seconds": 1197.95,
+  "total_seconds": 1199.59,
+  "throughput_articles_per_second": 18.09,
+  "output_size_bytes": 68746967,
+  "max_text_length": 1000
+}

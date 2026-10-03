@@ -1,216 +1,220 @@
-# 🎖️ Military NER — Analyse des articles TASS
+# Military-NER-TASS
 
-> Pipeline NLP complet pour l'extraction d'entités militaires dans des articles de presse russes (TASS), appliqué au conflit russo-ukrainien.  
-> Projet réalisé dans le cadre du cours **AI Deployment** — Eugenia School 2025/2026
+## Présentation
 
----
+Military-NER-TASS est un prototype de veille documentaire et d'extraction automatique d'entités militaires.
 
-## 📌 Objectif
+Le projet analyse des articles publics du corpus TASS et identifie trois catégories d'entités :
 
-Construire un pipeline de **Named Entity Recognition (NER)** capable de détecter automatiquement trois types d'entités militaires dans des articles de presse :
+- `WEAPON` : armes et systèmes d'armement ;
+- `MIL_UNIT` : unités, groupes et formations militaires ;
+- `MIL_ORG` : organisations, ministères et alliances militaires.
 
-| Label | Description | Exemples |
-|---|---|---|
-| `WEAPON` | Missiles, aéronefs, chars, systèmes de défense | S-400, Kalibr, Su-57, Ka-52 |
-| `MIL_UNIT` | Unités militaires, flottes, groupes de combat | Baltic Fleet, Battlegroup East |
-| `MIL_ORG` | Organisations, ministères, alliances | NATO, Rostec, Defense Ministry |
+L'objectif est d'aider un analyste à retrouver rapidement les informations importantes dans un grand volume d'articles. Le projet ne remplace pas une analyse humaine et ne constitue pas un outil de décision opérationnelle.
 
-Ce projet compare **deux méthodes d'annotation** pour entraîner un modèle NER :
+## Fonctionnement général
 
-| | TP-LLM | TP-RuleBased ✅ |
-|---|---|---|
-| **Méthode** | Annotation par LLM (Groq Llama-3.1) | Annotation par dictionnaire (EntityRuler) |
-| **F1-score** | ~42% | **84.3%** |
-| **Méthode retenue** | ❌ | ✅ |
-
----
-
-## 📁 Structure du projet
-
+```text
+Articles TASS
+    ↓
+Extraction et nettoyage
+    ↓
+Annotation LLM exploratoire et annotation rule-based
+    ↓
+Entraînement du modèle NER spaCy
+    ↓
+Inférence sur les articles
+    ↓
+Résultats JSON
+    ↓
+Elasticsearch et Kibana
+    ↓
+API Docker de prédiction
 ```
+
+Deux méthodes d'annotation ont été étudiées. La méthode LLM a été utilisée comme méthode exploratoire et de pré-annotation. La méthode rule-based a été retenue pour la production, car elle était plus homogène, reproductible et performante dans l'expérimentation du projet.
+
+## Résultats principaux
+
+L'inférence complète a traité :
+
+- 21 675 articles valides ;
+- 13 648 articles avec au moins une entité ;
+- 8 027 articles sans entité ;
+- 34 848 entités détectées.
+
+Répartition des entités détectées :
+
+- `MIL_ORG` : 18 612 ;
+- `WEAPON` : 9 266 ;
+- `MIL_UNIT` : 6 970.
+
+Résultats du réentraînement local sur le jeu de validation utilisé :
+
+- précision : 94,40 % ;
+- rappel : 96,56 % ;
+- F1-score : 95,47 %.
+
+## Organisation du projet
+
+```text
 Military-NER-TASS/
-│
-├── README.md
-├── .gitignore
-│
-├── TP-LLM/                               ← Méthode par LLM (comparaison)
+├── TP - Rule Based/
 │   ├── app/
-│   │   ├── step2_extraction.py           # Nettoyage du corpus
-│   │   ├── step3_annotation_rulebased.py # Annotation Rule-Based (base de comparaison)
-│   │   ├── step3b_annotation_llm_groq.py # Annotation LLM (Groq - Llama-3.1)
-│   │   ├── step3c_comparaison.py         # Rapport comparatif Rule-Based vs LLM
-│   │   └── step4a_convert_spacy.py       # Conversion annotations → .spacy (DocBin)
+│   │   ├── step2_extraction.py
+│   │   ├── step3_annotation_rulebased.py
+│   │   ├── step3b_annotation_llm_groq.py
+│   │   ├── step4_training_ner.py
+│   │   └── step5_inference.py
 │   ├── data/
-│   │   ├── annotations_llm.json          # 384 articles annotés par LLM
-│   │   ├── annotations_spacy.json        # 516 articles annotés Rule-Based
-│   │   ├── rapport_comparaison.txt       # Rapport statistique comparatif
-│   │   ├── train.spacy                   # Données entraînement (80%)
-│   │   └── dev.spacy                     # Données validation (20%)
-│   └── config.cfg                        # Config spaCy pour entraînement LLM
-│
-└── TP-RuleBased/                         ← Méthode retenue ✅
-    ├── app/
-    │   ├── step2_extraction.py           # Nettoyage du corpus (800 articles)
-    │   ├── step3_annotation_rulebased.py # Annotation par dictionnaire (~60 termes)
-    │   ├── step4_training_ner.py         # Entraînement du modèle NER spaCy
-    │   ├── step5_inference.py            # Inférence sur les 21 675 articles
-    │   └── step6a_ingestion_elasticsearch.py  # Indexation dans Elasticsearch
-    ├── data/
-    │   ├── annotations_spacy.json        # 516 articles annotés
-    │   └── data_set_nettoyé.json        # 800 articles nettoyés
-    └── model_ner/                        # Modèle NER entraîné (F1 = 84.3%)
+│   ├── model_ner/
+│   ├── deployment/
+│   ├── Bloc4/
+│   ├── logs/
+│   ├── tests/
+│   └── step6a_ingestion_elasticsearch_local.py
+├── TP - LLM/
+└── README.md
 ```
 
----
+## Installation sous Windows
 
-## ⚙️ Installation
+Depuis le dossier `TP - Rule Based` :
 
-### Prérequis
-- Python 3.11+
-- Compte [Elastic Cloud](https://cloud.elastic.co) (gratuit)
-- Clé API [Groq](https://console.groq.com) (gratuite, pour TP-LLM uniquement)
-
-### Installer les dépendances
-
-```bash
-pip install spacy groq elasticsearch python-dotenv
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 ```
 
-### Configurer les variables d'environnement
+Le modèle final entraîné doit être présent dans :
 
-Crée un fichier `.env` dans chaque dossier (`TP-LLM/` et `TP-RuleBased/`) :
-
-```env
-CLOUD_ID      = "ton_cloud_id_elastic"
-ES_USER       = "elastic"
-ES_PASS       = "ton_mot_de_passe"
-INDEX         = "tass_articles"
-GROQ_API_KEY  = "ta_cle_groq"   # uniquement pour TP-LLM
+```text
+model_ner/
 ```
 
----
+## Tests
 
-## 🚀 Lancer le pipeline
+Depuis la racine de `TP - Rule Based` :
 
-### TP-RuleBased (méthode retenue ✅)
-
-Depuis `TP-RuleBased/app/` :
-
-```bash
-# Étape 1 — Nettoyage du corpus
-python step2_extraction.py
-
-# Étape 2 — Annotation par dictionnaire
-python step3_annotation_rulebased.py
-
-# Étape 3 — Entraînement du modèle NER
-python step4_training_ner.py
-
-# Étape 4 — Inférence sur les 21 675 articles
-python step5_inference.py
-
-# Étape 5 — Indexation dans Elasticsearch
-python step6a_ingestion_elasticsearch.py
+```powershell
+python -m pytest -q
 ```
 
----
+Résultat attendu :
 
-### TP-LLM (méthode de comparaison)
-
-Depuis `TP-LLM/app/` :
-
-```bash
-# Étape 1 — Nettoyage du corpus
-python step2_extraction.py
-
-# Étape 2a — Annotation Rule-Based (base de comparaison)
-python step3_annotation_rulebased.py
-
-# Étape 2b — Annotation LLM (Groq)
-python step3b_annotation_llm_groq.py
-
-# Étape 3 — Rapport comparatif
-python step3c_comparaison.py
-
-# Étape 4 — Conversion au format spaCy
-python step4a_convert_spacy.py
-
-# Étape 5 — Entraînement (via CLI spaCy)
-python -m spacy train config.cfg --output ./data/output \
-  --paths.train ./data/train.spacy \
-  --paths.dev ./data/dev.spacy
+```text
+2 passed
 ```
 
----
+## Exécution du pipeline
 
-## 📊 Résultats
+Les étapes peuvent être exécutées séparément :
 
-### Comparaison des méthodes d'annotation
+```powershell
+python .\app\step2_extraction.py
+python .\app\step3_annotation_rulebased.py
+python .\app\step4_training_ner.py
+python .\app\step5_inference.py
+python .\step6a_ingestion_elasticsearch_local.py
+```
 
-| | Rule-Based ✅ | LLM (Llama-3.1) |
-|---|---|---|
-| Articles annotés | **516 / 800** | 384 / 500 |
-| WEAPON | 367 | 561 |
-| MIL_UNIT | 254 | 600 |
-| MIL_ORG | 691 | 729 |
-| **TOTAL entités** | **1 312** | **1 890** |
-| Termes uniques WEAPON | 43 | 424 |
-| Termes uniques MIL_UNIT | 17 | 363 |
-| Termes uniques MIL_ORG | 14 | 317 |
-| Temps annotation | ⚡ Instantané | ⏳ 40 min |
-| **F1-score modèle** | **84.3%** | 42% |
+Attention :
 
-### Performances du modèle retenu (Rule-Based)
+- l'entraînement remplace le contenu de `model_ner/` ;
+- l'inférence complète peut prendre plusieurs minutes ;
+- l'indexation doit être lancée après la création de `resultats_inference.json` ;
+- les métriques sont conservées dans `logs/`.
 
-| Métrique | Score |
-|---|---|
-| Précision (P) | **84.3%** |
-| Rappel (R) | **84.4%** |
-| **F1-score** | **84.3%** |
+## Elasticsearch et Kibana
 
-### Insights Kibana (21 675 articles — 2015 à 2025)
+Démarrer l'infrastructure locale :
 
-| Visualisation | Insight principal |
-|---|---|
-| Top 10 Armes | S-400 et Kinzhal sont les plus citées |
-| Top 10 Unités | Baltic Fleet domine (~410 mentions) |
-| Top 10 Organisations | Rostec domine (~870 mentions) |
-| Évolution temporelle | Pic en 2022-2023 (invasion Ukraine) |
-| Répartition entités | MIL_ORG 56% / WEAPON 37% / MIL_UNIT 7% |
+```powershell
+docker compose -f .\deployment\docker-compose.elasticsearch.yml up -d
+```
 
----
+Vérifier Elasticsearch :
 
-## 🏆 Justification du choix — Rule-Based
+```powershell
+Invoke-RestMethod http://localhost:9200
+Invoke-RestMethod http://localhost:9200/_cluster/health
+```
 
-> Malgré un vocabulaire plus restreint (74 termes uniques vs 1 104 pour le LLM), le modèle Rule-Based atteint un **F1 de 84.3%** contre seulement **42%** pour le modèle entraîné sur les annotations LLM.
->
-> Les annotations LLM introduisent du bruit (positions incorrectes, faux positifs, incohérences entre articles) qui dégrade la qualité de l'entraînement spaCy. La méthode LLM reste utile pour **enrichir le dictionnaire** Rule-Based à terme.
+Kibana est disponible à l'adresse :
 
----
+```text
+http://localhost:5601
+```
 
-## 🛠️ Technologies
+L'index utilisé pour la démonstration est :
 
-| Technologie | Usage |
-|---|---|
-| **spaCy 3.8** | NER, EntityRuler, entraînement, inférence |
-| **Groq API (Llama-3.1-8b)** | Annotation automatique par LLM |
-| **Elasticsearch** | Indexation et recherche full-text |
-| **Kibana** | Dashboards de visualisation |
-| **python-dotenv** | Gestion sécurisée des secrets |
-| **Python 3.11** | Langage principal |
+```text
+tass_articles_soutenance_2026
+```
 
----
+## API du Bloc 4
 
-## ⚠️ Sécurité
+Installer les dépendances de l'API :
 
-Les fichiers suivants sont exclus du dépôt Git (voir `.gitignore`) :
-- `.env` — contient les clés API et mots de passe
-- `data/data_set.json` — corpus brut (trop volumineux)
-- `data/resultats_inference.json` — résultats complets (trop volumineux)
+```powershell
+python -m pip install -r .\Bloc4\02_Code_Developpement\requirements.txt
+```
 
----
+Démarrer l'API :
 
-## 👩‍💻 Auteur
+```powershell
+Set-Location .\Bloc4\03_Code_Deployement
+python -m uvicorn api:app --reload --port 8000
+```
 
-Projet réalisé dans le cadre du cours **AI Deployment** — Eugenia School 2025/2026
+Documentation interactive :
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Endpoints disponibles :
+
+- `GET /health` : vérifie que le modèle est chargé ;
+- `POST /predict` : extrait les entités d'un texte ;
+- `GET /metrics` : affiche les métriques simples du service.
+
+Le service peut également être démarré avec Docker :
+
+```powershell
+docker compose -f .\Bloc4\03_Code_Deployement\docker-compose.yml up --build
+```
+
+## Sécurité
+
+Les fichiers suivants ne doivent jamais être publiés :
+
+```text
+.env
+.env.local
+*.key
+*.pem
+```
+
+Le dépôt peut contenir uniquement :
+
+```text
+.env.example
+```
+
+Les clés Groq, mots de passe Elasticsearch, Cloud ID et clés API doivent rester dans des variables d'environnement locales.
+
+## Limites
+
+- Le modèle est spécialisé sur le corpus TASS et le domaine militaire étudié ;
+- les annotations automatiques ne constituent pas une vérité terrain exhaustive ;
+- certaines entités peuvent être manquées ou mal classées ;
+- une validation humaine reste nécessaire ;
+- l'infrastructure locale Elasticsearch/Kibana est destinée à la démonstration et n'est pas une architecture haute disponibilité ;
+- les dashboards doivent toujours être interprétés avec leur période et leur filtre temporel.
+
+## Licence et usage
+
+Projet réalisé dans le cadre d'une soutenance. Les sources et données utilisées doivent respecter les conditions d'utilisation applicables au corpus TASS.

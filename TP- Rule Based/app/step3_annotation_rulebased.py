@@ -10,13 +10,25 @@ Installation préalable :
 """
 
 import json
+import time
+from pathlib import Path
+
 import spacy                           # bibliothèque de traitement du langage naturel
 from spacy.pipeline import EntityRuler #permet d'ajouter un composant de règles d'entités à un pipeline spaCy
 
-# ── Chargement de spaCy ───────────────────────────────────────────────────────
+# ── Chemins et chargement ─────────────────────────────────────────────────────
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / 'data'
+LOG_DIR = BASE_DIR / 'logs'
+LOG_DIR.mkdir(exist_ok=True)
+MAX_TEXT_LENGTH = 1000
+start_total = time.perf_counter()
+model_start = time.perf_counter()
 print("⏳ Chargement de spaCy...")
 nlp = spacy.load("en_core_web_sm")
 ruler = nlp.add_pipe("entity_ruler", before="ner")
+model_load_seconds = time.perf_counter() - model_start
+print(f"✅ spaCy chargé en {model_load_seconds:.2f} s")
 
 # ── Dictionnaire d'entités militaires ────────────────────────────────────────
 patterns = [
@@ -125,7 +137,7 @@ patterns = [
 ruler.add_patterns(patterns)
 
 # ── Chargement du corpus ─────────────────────────────────────────────────────
-with open('../data/data_set_nettoyé.json', 'r', encoding='utf-8') as f:
+with (DATA_DIR / 'data_set_nettoyé.json').open('r', encoding='utf-8') as f:
     corpus = json.load(f)
 
 print(f"📥 {len(corpus)} articles à annoter\n")
@@ -135,7 +147,7 @@ annotations_spacy = []
 skipped = 0
 
 for i, texte in enumerate(corpus):
-    texte_tronque = texte[:1000]
+    texte_tronque = texte[:MAX_TEXT_LENGTH]
     doc = nlp(texte_tronque)
 
     spans = []
@@ -168,7 +180,12 @@ for label, count in counts.items():
 print(f"  {'TOTAL':10} : {sum(counts.values())}")
 
 # ── Sauvegarde ────────────────────────────────────────────────────────────────
-with open('../data/annotations_spacy.json', 'w', encoding='utf-8') as f:
+output_path = DATA_DIR / 'annotations_spacy.json'
+with output_path.open('w', encoding='utf-8') as f:
     json.dump(annotations_spacy, f, ensure_ascii=False, indent=2)
-
-print(f"\n✅ ../data/annotations_spacy.json sauvegardé — prêt pour l'entraînement spaCy !")
+duration = time.perf_counter() - start_total
+metrics = {'input_articles': len(corpus), 'annotated_articles': len(annotations_spacy), 'skipped_articles': skipped, 'counts': counts, 'max_text_length': MAX_TEXT_LENGTH, 'duration_seconds': round(duration, 2), 'output_size_bytes': output_path.stat().st_size}
+with (LOG_DIR / 'step3_metrics.json').open('w', encoding='utf-8') as f:
+    json.dump(metrics, f, ensure_ascii=False, indent=2)
+print(f"\n✅ {output_path} sauvegardé — prêt pour l'entraînement spaCy !")
+print(f"⏱️ Durée totale : {duration:.2f} s | taille sortie : {output_path.stat().st_size} octets")

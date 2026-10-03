@@ -1,0 +1,17 @@
+# NLP et modèle NER spaCy.
+# La borne <3.9 garantit la compatibilité avec le modèle entraîné.
+spacy>=3.8,<3.9
+
+# Client Python utilisé pour Elasticsearch.
+elasticsearch>=8,<9
+
+# Lecture des variables d'environnement depuis le fichier .env.
+python-dotenv>=1.0,<2
+
+# Collecte et parsing des contenus lorsque l'étape d'extraction est utilisée.
+requests>=2.31,<3
+beautifulsoup4>=4.12,<5
+lxml>=5,<6
+
+# Exécution des tests automatisés.
+pytest>=8,<9

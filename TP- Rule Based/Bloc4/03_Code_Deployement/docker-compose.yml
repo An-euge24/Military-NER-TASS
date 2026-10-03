@@ -1,0 +1,10 @@
+services:
+  military-ner-api:
+    build:
+      context: ../..
+      dockerfile: Bloc4/03_Code_Deployement/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      MODEL_PATH: /app/model_ner
+    restart: unless-stopped

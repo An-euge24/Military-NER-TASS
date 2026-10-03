@@ -7,15 +7,21 @@ Output : data_set_nettoyé.json (liste de 800 textes nettoyés, tirés aléatoir
 import json
 import re
 import random
+import time
+from pathlib import Path
 
 # ── Paramètres ────────────────────────────────────────────────────────────────
-INPUT_FILE  = '../data/data_set.json'
-OUTPUT_FILE = '../data/data_set_nettoyé.json'
+BASE_DIR = Path(__file__).resolve().parent.parent
+INPUT_FILE = BASE_DIR / 'data' / 'data_set.json'
+OUTPUT_FILE = BASE_DIR / 'data' / 'data_set_nettoyé.json'
+LOG_DIR = BASE_DIR / 'logs'
+LOG_DIR.mkdir(exist_ok=True)
 NB_ARTICLES = 800
 RANDOM_SEED = 42          # changer pour un tirage différent
 
 # ── Chargement ────────────────────────────────────────────────────────────────
-with open(INPUT_FILE, 'r', encoding='utf-8') as f:
+start = time.perf_counter()
+with INPUT_FILE.open('r', encoding='utf-8') as f:
     data = json.load(f)
 
 # ── Filtrage : articles avec texte valide ────────────────────────────────────
@@ -44,4 +50,9 @@ corpus = [clean_text(a['text']) for a in sample]
 with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
     json.dump(corpus, f, ensure_ascii=False, indent=2)
 
+duration = time.perf_counter() - start
+metrics = {'input_articles': len(data), 'valid_articles': len(articles_valides), 'sample_articles': len(corpus), 'duration_seconds': round(duration, 2), 'output_size_bytes': OUTPUT_FILE.stat().st_size}
+with (LOG_DIR / 'step2_metrics.json').open('w', encoding='utf-8') as f:
+    json.dump(metrics, f, ensure_ascii=False, indent=2)
 print(f"✅ {OUTPUT_FILE} créé — {len(corpus)} textes")
+print(f"⏱️ Durée totale : {duration:.2f} s | taille sortie : {OUTPUT_FILE.stat().st_size} octets")

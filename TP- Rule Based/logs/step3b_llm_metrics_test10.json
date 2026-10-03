@@ -1,0 +1,22 @@
+{
+  "method": "LLM",
+  "provider": "Groq",
+  "model": "openai/gpt-oss-20b",
+  "input_file": "C:\\Users\\makil\\Downloads\\Soutenance\\Military-NER-TASS-main\\TP- Rule Based\\data\\data_set_nettoyé.json",
+  "output_file": "C:\\Users\\makil\\Downloads\\Soutenance\\Military-NER-TASS-main\\TP- Rule Based\\data\\annotations_llm.json",
+  "input_articles_total": 800,
+  "processed_articles": 10,
+  "annotated_articles": 10,
+  "articles_without_entities": 0,
+  "api_or_json_errors": 0,
+  "entity_counts": {
+    "WEAPON": 12,
+    "MIL_UNIT": 11,
+    "MIL_ORG": 16
+  },
+  "total_entities": 39,
+  "max_characters_per_article": 800,
+  "duration_seconds": 10.1,
+  "average_seconds_per_article": 0.71,
+  "error_examples": []
+}

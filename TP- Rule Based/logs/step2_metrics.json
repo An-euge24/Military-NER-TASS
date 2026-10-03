@@ -1,0 +1,7 @@
+{
+  "input_articles": 21742,
+  "valid_articles": 21675,
+  "sample_articles": 800,
+  "duration_seconds": 0.53,
+  "output_size_bytes": 1113386
+}

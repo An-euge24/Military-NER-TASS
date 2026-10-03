@@ -1,0 +1,13 @@
+{
+  "input_articles": 800,
+  "annotated_articles": 516,
+  "skipped_articles": 284,
+  "counts": {
+    "WEAPON": 367,
+    "MIL_UNIT": 254,
+    "MIL_ORG": 691
+  },
+  "max_text_length": 1000,
+  "duration_seconds": 43.64,
+  "output_size_bytes": 603589
+}

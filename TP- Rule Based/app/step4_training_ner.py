@@ -9,14 +9,20 @@ Prérequis : pip install spacy
 
 import json
 import random
+import time
 import spacy
 from spacy.training import Example
 from spacy.util import minibatch, compounding
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
 # ── Paramètres ────────────────────────────────────────────────────────────────
-INPUT_FILE   = "../data/annotations_spacy.json"
-OUTPUT_DIR   = "model_ner"
+INPUT_FILE   = DATA_DIR / "annotations_spacy.json"
+OUTPUT_DIR   = BASE_DIR / "model_ner"
 N_ITER       = 30        # nombre d'époques d'entraînement
 TRAIN_RATIO  = 0.8       # 80% entraînement / 20% validation
 RANDOM_SEED  = 42
@@ -24,6 +30,8 @@ RANDOM_SEED  = 42
 random.seed(RANDOM_SEED)
 
 # ── Chargement des annotations ────────────────────────────────────────────────
+start_total = time.perf_counter()
+model_start = time.perf_counter()
 print("📥 Chargement des annotations...")
 with open(INPUT_FILE, "r", encoding="utf-8") as f:
     data = json.load(f)
@@ -42,6 +50,7 @@ print(f"  Valid : {len(val_data)} articles\n")
 # ── Chargement du modèle de base ─────────────────────────────────────────────
 print("⏳ Chargement du modèle de base en_core_web_sm...")
 nlp = spacy.load("en_core_web_sm")
+print(f"✅ Modèle de base chargé en {time.perf_counter() - model_start:.2f} s")
 
 # Ajouter le composant NER s'il n'existe pas
 if "ner" not in nlp.pipe_names:
@@ -113,4 +122,10 @@ output_path.mkdir(exist_ok=True)
 nlp.to_disk(output_path)
 
 print(f"\n✅ Modèle sauvegardé dans : {OUTPUT_DIR}/")
+duration = time.perf_counter() - start_total
+metrics = {"train_articles": len(train_data), "validation_articles": len(val_data), "iterations": N_ITER, "precision": ner_scores[0], "recall": ner_scores[1], "f1": ner_scores[2], "duration_seconds": round(duration, 2), "model_dir": str(output_path)}
+with (LOG_DIR / "step4_metrics.json").open("w", encoding="utf-8") as f:
+    json.dump(metrics, f, ensure_ascii=False, indent=2)
+print(f"⏱️ Durée totale entraînement + évaluation : {duration:.2f} s")
+print(f"📊 Métriques sauvegardées dans : {LOG_DIR / 'step4_metrics.json'}")
 print("🎯 Prêt pour l'étape 5 — Inférence sur le corpus complet !")
