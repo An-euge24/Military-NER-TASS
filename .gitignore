@@ -1,21 +1,8 @@
-# Secrets
 .env
-
-# Données volumineuses
-data/data_set.json
-data/resultats_inference.json
-TP- Rule Based/data/resultats_inference.json
-
-# Modèle (optionnel, peut être lourd)
-# model_ner/
-
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
+.env.*
+!.env.example
 .venv/
-venv/
-
-# OS
-.DS_Store
-Thumbs.db
+__pycache__/
+.pytest_cache/
+*.pyc
+*.log
